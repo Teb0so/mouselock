@@ -1,12 +1,13 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Wpedantic -std=c11 -g
-PKG_CONFIG = pkg-config
 
-CFLAGS += $(shell $(PKG_CONFIG) --cflags libevdev)
-LDLIBS += $(shell $(PKG_CONFIG) --libs libevdev)
+CFLAGS = -Wall -Wextra -Wpedantic -std=c11 -g
+CFLAGS += $(shell pkg-config --cflags libevdev)
+
+LDLIBS = $(shell pkg-config --libs libevdev)
 
 TARGET = mlock
-SRC = mlock.c
+
+SRC = $(wildcard *.c)
 OBJ = $(SRC:.c=.o)
 
 .PHONY: all clean
