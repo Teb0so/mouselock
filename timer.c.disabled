@@ -1,7 +1,0 @@
-#define _GNU_SOURCE
-#include <sys/timerfd.h>
-
-int timer_init() {
-    int x;
-    timerfd_gettime(CLOCK_MONOTONIC, &x)
-}
