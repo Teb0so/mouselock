@@ -1,6 +1,9 @@
 #ifndef MOUSE_H
 #define MOUSE_H
 
+#include <stdbool.h>
+#include <time.h>
+
 enum actiontype {
     CLICK,
     RELEASE
@@ -13,6 +16,8 @@ typedef struct {
 
 typedef struct {
     struct libevdev_uinput *udev;
+    bool locked;
+    struct timespec press_time;
 } FakeMouse;
 
 extern int mouse_init(Mouse *mouse, const char *device);

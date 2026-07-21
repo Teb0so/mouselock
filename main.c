@@ -12,7 +12,6 @@ void event_handler(Mouse *mouse, FakeMouse *fmouse) {
     struct input_event ev;
     int rc;
 
-    struct timespec start, end;
 
     while ((rc = libevdev_next_event(mouse->dev, LIBEVDEV_READ_FLAG_NORMAL, &ev)) == LIBEVDEV_READ_STATUS_SUCCESS) {
         // printf("type=%d code=%d value=%d\n", ev.type, ev.code, ev.value);
@@ -22,17 +21,28 @@ void event_handler(Mouse *mouse, FakeMouse *fmouse) {
                 if (ev.code == BTN_LEFT) {
                     if (ev.value) {
                         printf("click\n");
-                        clock_gettime(CLOCK_MONOTONIC, &start);
-                        // fmouse_action(fmouse, CLICK);
-                        // fmouse_action(fmouse, RELEASE);
+                        if (fmouse->locked) {
+                            clock_gettime(CLOCK_MONOTONIC, &fmouse->press_time);
+                            fmouse_action(fmouse, RELEASE);
+                            fmouse->locked = false;
+                        }
+                        else {
+                            clock_gettime(CLOCK_MONOTONIC, &fmouse->press_time);
+                        }
                     }
                     else {
+                        struct timespec now;
                         printf("release\n");
-                        clock_gettime(CLOCK_MONOTONIC, &end);
+                        clock_gettime(CLOCK_MONOTONIC, &now);
                         double elapsed =
-                            (end.tv_sec - start.tv_sec) +
-                            (end.tv_nsec - start.tv_nsec) / 1e9;
-                        printf("clicked for: %f\n", elapsed);
+                            (now.tv_sec - fmouse->press_time.tv_sec) +
+                            (now.tv_nsec - fmouse->press_time.tv_nsec) / 1e9;
+                        printf("pressed for: %fms\n", elapsed);
+                        if (!fmouse->locked && elapsed >= 0.5) {
+                            fmouse_action(fmouse, CLICK);
+                            fmouse->locked = true;
+                        }
+                        printf("%d\n", fmouse->locked);
                     }
                 }
 
